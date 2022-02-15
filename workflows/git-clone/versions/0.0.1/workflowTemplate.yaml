@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: c2csdp.git-clone.0.0.1
+  annotations:
+    argo-hub/version: '0.0.1'
+    argo-hub/description: 'Generic Git Clone operation'
+    argo-hub/license: 'MIT'
+    argo-hub/owner_name: 'Laurent Rochette'
+    argo-hub/owner_email: 'laurent.rochettev@codefresh.io'
+    argo-hub/owner_avatar: 'https://avatars.githubusercontent.com/u/2013371?v=4'
+    argo-hub/owner_url: 'https://github.com/lrochette'
+    argo-hub/categories: 'git'
+    argo-hub/icon_url: "https://cdn.jsdelivr.net/gh/codefresh-io/argo-hub@main/workflows/git/assets/icon.svg"
+    argo-hub/icon_background: "#f4f4f4"
+spec:
+  templates:
+  - name: git-clone
+    metadata:
+      annotations:
+        argo-hub-template/description: 'Clone a repository /codefersh/volume'
+        argo-hub-template/icon_url: "https://cdn.jsdelivr.net/gh/codefresh-io/argo-hub@main/workflows/git/assets/icon.svg"
+        argo-hub-template/icon_background: "#f4f4f4"
+    inputs:
+      parameters:
+        - name: CF_REPO_OWNER
+        - name: CF_REPO_NAME
+        - name: CF_BRANCH
+          default: main
+        - name: GIT_TOKEN_SECRET
+          default: github-token
+      artifacts:
+        - name: repo
+          path: /src
+          git:
+            repo: 'https://github.com/{{ inputs.parameters.CF_REPO_OWNER }}/{{ inputs.parameters.CF_REPO_NAME }}'
+            revision: '{{ inputs.parameters.CF_BRANCH }}'
+            usernameSecret:
+              name: '{{ inputs.parameters.GIT_TOKEN_SECRET }}'
+              key: token
+    script:
+      image: bitnami/git:latest
+      workingDir: /codefresh/volume
+      command: [bash]
+      source: |
+        export CF_REPO_NAME=${{inputs.parameters.CF_REPO_NAME}}
+        echo /codefersh/volume/${CF_REPO_NAME} > /tmp/working_dir.txt
+        cp -RT /src /codefresh/volume/${CF_REPO_NAME}
+        cd /codefresh/volume/${CF_REPO_NAME}
+        git status
+        git log -2 --pretty=oneline        echo cloned repo = {{ inputs.parameters.REPO_URL }} with revision = {{ inputs.parameters.REVISION }}
+      volumeMounts:
+        - name: codefresh-volume
+          mountPath: /codefresh/volume
+    outputs:
+      parameters:
+      - name: WORKING_DIR
+        valueFrom:
+          path: /tmp/working_dir.txt
