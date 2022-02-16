@@ -26,7 +26,7 @@ spec:
           - name: image
           - name: commands
           - name: working_directory
-            value: ./
+            value: /codefresh/volume
           - name: shell
             value: sh
 
