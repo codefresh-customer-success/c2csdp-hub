@@ -43,13 +43,12 @@ spec:
       workingDir: /codefresh/volume
       command: [bash]
       source: |
-        ls -ail
         export CF_REPO_NAME={{inputs.parameters.CF_REPO_NAME}}
-        export
-        echo
+        ls -ail /src
+        cp -RT /src /codefresh/volume/${CF_REPO_NAME}
         ls -ail ./$CF_REPO_NAME
         echo /codefresh/volume/${CF_REPO_NAME} > /tmp/working_dir.txt
-        cp -RT /src /codefresh/volume/${CF_REPO_NAME}
+
         cd /codefresh/volume/${CF_REPO_NAME}
         git status
         git log -2 --pretty=oneline
