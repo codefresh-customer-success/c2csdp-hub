@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: c2csdp.freestyle.0.0.1
+  annotations:
+    argo-hub/version: '0.0.1'
+    argo-hub/description: 'Generic freestyle operation'
+    argo-hub/license: 'MIT'
+    argo-hub/owner_name: 'Laurent Rochette'
+    argo-hub/owner_email: 'laurent.rochettev@codefresh.io'
+    argo-hub/owner_avatar: 'https://avatars.githubusercontent.com/u/2013371?v=4'
+    argo-hub/owner_url: 'https://github.com/lrochette'
+    argo-hub/categories: 'git'
+    argo-hub/icon_url: "https://cdn.jsdelivr.net/gh/codefresh-io/argo-hub@main/workflows/git/assets/icon.svg"
+    argo-hub/icon_background: "#f4f4f4"
+spec:
+  templates:
+  - name: freestyle
+    metadata:
+      annotations:
+        argo-hub-template/description: 'Generic freestyle step'
+        argo-hub-template/icon_url: "https://cdn.jsdelivr.net/gh/codefresh-io/argo-hub@main/workflows/git/assets/icon.svg"
+        argo-hub-template/icon_background: "#f4f4f4"
+    inputs:
+      parameters:
+          - name: image
+          - name: commands
+          - name: working_directory
+            value: /codefresh/volume
+          - name: shell
+            value: sh
+
+    script:
+      image: "{{ inputs.parameters.image }}"
+      workingDir: /codefresh/volume
+      command: ["{{ inputs.parameters.shell }}"]
+      source: |
+        cd {{ inputs.parameters.working_directory }}
+        echo Executing commands:
+        {{inputs.parameters.commands}}
+      volumeMounts:
+        - name: "codefresh-volume"
+          mountPath: /codefresh/volumeß
