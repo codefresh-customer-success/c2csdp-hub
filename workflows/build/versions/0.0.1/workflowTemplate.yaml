@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: c2csdp.freestyle.0.0.1
+  name: c2csdp.build.0.0.1
   annotations:
     argo-hub/version: '0.0.1'
-    argo-hub/description: 'Generic Git Clone operation'
+    argo-hub/description: 'Generic Container build operation with Kaniko'
     argo-hub/license: 'MIT'
     argo-hub/owner_name: 'Laurent Rochette'
     argo-hub/owner_email: 'laurent.rochettev@codefresh.io'
@@ -15,29 +15,36 @@ metadata:
     argo-hub/icon_background: "#f4f4f4"
 spec:
   templates:
-  - name: freestyle
+  - name: build
     metadata:
       annotations:
-        argo-hub-template/description: 'Generic freestyle step'
+        argo-hub-template/description: 'Generic build step'
         argo-hub-template/icon_url: "https://cdn.jsdelivr.net/gh/codefresh-io/argo-hub@main/workflows/git/assets/icon.svg"
         argo-hub-template/icon_background: "#f4f4f4"
     inputs:
       parameters:
-          - name: image
-          - name: commands
+          - name: image_name
+          - name: tag
+          - name: dockerfile
+            value: Dockerfile
+          - name: context
+            value: .
           - name: working_directory
             value: /codefresh/volume
-          - name: shell
-            value: sh
-
-    script:
-      image: "{{ inputs.parameters.image }}"
-      workingDir: /codefresh/volume
-      command: ["{{ inputs.parameters.shell }}"]
-      source: |
-        cd {{ inputs.parameters.working_directory }}
-        echo Executing commands:
-        {{inputs.parameters.commands}}
+    container:
+      image: gcr.io/kaniko-project/executor:v1.7.0
+      workingDir: '{{ inputs.parameters.working_directory }}'
+      command: ["/kaniko/executor"]
+      args:
+        - --cache
+        - --cache-copy-layers
+        - --cache-repo={{ inputs.parameters.image_name }}-cache
+        - --reproducible
+        - --context={{ inputs.parameters.context }}
+        - --dockerfile={{ inputs.parameters.dockerfile }}
+        - --destination={{ inputs.parameters.image_name }}:{{ inputs.parameters.tag }}
       volumeMounts:
         - name: "codefresh-volume"
           mountPath: /codefresh/volume
+        - mountPath: /kaniko/.docker/
+          name: docker-config
