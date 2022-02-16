@@ -31,6 +31,8 @@ spec:
             value: .
           - name: working_directory
             value: /codefresh/volume
+          - name: docker-config
+            value: docker-config
     container:
       image: gcr.io/kaniko-project/executor:v1.7.0
       workingDir: '{{ inputs.parameters.working_directory }}'
@@ -47,4 +49,4 @@ spec:
         - name: "codefresh-volume"
           mountPath: /codefresh/volume
         - mountPath: /kaniko/.docker/
-          name: docker-config
+          name: {{ inputs.parameters.docker-config }}
