@@ -49,4 +49,4 @@ spec:
         - name: "codefresh-volume"
           mountPath: /codefresh/volume
         - mountPath: /kaniko/.docker/
-          name: {{ inputs.parameters.docker-config }}
+          name: '{{ inputs.parameters.docker-config }}'
